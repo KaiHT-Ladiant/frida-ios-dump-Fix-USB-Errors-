@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+# 
 # Author : AloneMonkey
 # Editor : Kai_HT
 # blog: www.alonemonkey.com
+#
+# The following programs are required to be stored in the location 'C:\Windows\System32'.
+# http://stahlworks.com/dev/?tool=zipunzip
 
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -27,6 +30,14 @@ import stat
 
 # Add Import 
 import platform
+import time
+
+
+
+def remove_readonly(func, path, _):
+    """Windows 읽기 전용 속성 제거 핸들러"""
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
 
 IS_PY2 = sys.version_info[0] < 3
 if IS_PY2:
@@ -81,19 +92,46 @@ def generate_ipa(path, display_name):
     print('Generating "{}"'.format(ipa_filename))
     try:
         app_name = file_dict['app']
+        if platform.system() == 'Windows':
+            for key in file_dict.keys():
+                if key != 'app':
+                    file_path = os.path.join(path, key)
+                    subprocess.check_call(['icacls', file_path, '/grant', 'Administrators:F', '/T'], shell=True)
+                    os.chmod(file_path, 0o777)
+                    
         for key, value in file_dict.items():
+            if key == 'app':
+                continue
             from_dir = os.path.join(path, key)
             to_dir = os.path.join(path, app_name, value)
-            if key != 'app':
-                shutil.move(from_dir, to_dir)
+            shutil.move(from_dir, to_dir)
 
         target_dir = './' + PAYLOAD_DIR
-        zip_args = ('zip', '-qr', os.path.join(os.getcwd(), ipa_filename), target_dir)
+        ipa_path = os.path.join(os.getcwd(), ipa_filename)
+        zip_args = ('zip', '-qr', ipa_path, target_dir)
         subprocess.check_call(zip_args, cwd=TEMP_DIR)
-        shutil.rmtree(PAYLOAD_PATH)
+        print('\n[SUCCESS] IPA 저장 경로:', os.path.abspath(ipa_path))
+                
     except Exception as e:
-        print(e)
+        print(f"IPA 생성 실패: {e}")
+    finally:
+        if os.path.exists(PAYLOAD_PATH):
+            try:
+                # Windows 전용 강제 삭제
+                if platform.system() == 'Windows':
+                    subprocess.check_call(
+                        ['takeown', '/F', PAYLOAD_PATH, '/R', '/D', 'Y'],
+                        shell=True
+                    )
+                    subprocess.check_call(
+                        ['icacls', PAYLOAD_PATH, '/grant', 'Administrators:F', '/T'],
+                        shell=True
+                    )
+                shutil.rmtree(PAYLOAD_PATH, onerror=remove_readonly)
+            except Exception as e:
+                print(f"청소 실패: {e}")
         finished.set()
+
 
 def on_message(message, data):
     t = tqdm(unit='B',unit_scale=True,unit_divisor=1024,miniters=1)
@@ -242,19 +280,56 @@ def load_js_file(session, filename):
     return script
 
 def create_dir(path):
-    path = path.strip().rstrip('\\')
     if os.path.exists(path):
-        try:
-            shutil.rmtree(path, ignore_errors=True)
-            # Windows에서 Read-only 속성 제거
-            subprocess.check_call(['attrib', '-R', path + '/*', '/S'])
-        except Exception as e:
-            print(f"Directory Delete Fail: {e}")
+        shutil.rmtree(path, onerror=remove_readonly)
     os.makedirs(path, exist_ok=True)
+
+    if os.path.exists(path):
+        shutil.rmtree(path, onerror=remove_readonly)
+    os.makedirs(path, exist_ok=True)
+
+def fix_windows_permissions(path):
+    if platform.system() == 'Windows':
+        for root, dirs, files in os.walk(path):
+            for item in dirs + files:
+                full_path = os.path.join(root, item)
+                try:
+                    subprocess.check_call(['attrib', '-R', full_path, '/S', '/D'])
+                except subprocess.CalledProcessError as e:
+                    print(f"속성 변경 실패: {e}")
+
 
 
 def open_target_app(device, name_or_bundleid):
     print('Start the target app {}'.format(name_or_bundleid))
+
+    apps = get_applications(device)
+    found_apps = [
+        app for app in apps 
+        if name_or_bundleid in (app.identifier, app.name)
+    ]
+	
+    if not found_apps:
+        raise Exception(f"Failed Load Apps: {name_or_bundleid}")
+
+    app = found_apps[0]
+    pid = app.pid
+    display_name = app.name
+    bundle_identifier = app.identifier
+
+    try:
+        if not pid:
+            print(f"앱 실행 시도: {bundle_identifier}")
+            pid = device.spawn([bundle_identifier])
+            session = device.attach(pid)
+            device.resume(pid)
+            time.sleep(2)  # 앱 실행 대기 추가
+        else:
+            session = device.attach(pid)
+        return session, display_name, bundle_identifier
+    except Exception as e:
+        print(f"앱 실행 실패: {e}")
+        raise
 
     pid = ''
     session = None
@@ -363,10 +438,17 @@ if __name__ == '__main__':
             traceback.print_exc()
             exit_code = 1
 
-    if ssh:
-        ssh.close()
 
-    if os.path.exists(PAYLOAD_PATH):
-        shutil.rmtree(PAYLOAD_PATH)
 
-    sys.exit(exit_code)
+        finally:
+            if os.path.exists(PAYLOAD_PATH):
+                fix_windows_permissions(PAYLOAD_PATH)
+                for _ in range(3):  # 최대 3회 재시도
+                    try:
+                        shutil.rmtree(PAYLOAD_PATH, onerror=remove_readonly)
+                        break
+                    except PermissionError:
+                        time.sleep(1)
+            if ssh:
+                ssh.close()
+        sys.exit(exit_code)
