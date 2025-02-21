@@ -42,7 +42,7 @@ Done.
 Congratulations!!! You've got a decrypted IPA file.
 
 Drag to [MonkeyDev](https://github.com/AloneMonkey/MonkeyDev), Happy hacking!
-Edit By [Kai_HT] (https://github.com/KaiHT-Ladiant), (https://redsec.kaiht.kr/)
+- Edit By [Kai_HT] (https://github.com/KaiHT-Ladiant), (https://redsec.kaiht.kr/)
 ## Support
 
 Python 2.x and 3.x
