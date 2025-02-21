@@ -1,18 +1,21 @@
-# frida-ios-dump
-Pull a decrypted IPA from a jailbroken device
+# frida-ios-dump (Fix Frida USB Error)
+Pull a decrypted IPA from a jailbroken device for Windows Users.
+- This is a code that modified the existing 'dump-frida-ios' code. It was modified to run on Windows and Linux platforms, and fixed a USB error in frida 16.1.x and later versions.
 
 
 ## Usage
 
  1. Install [frida](http://www.frida.re/) on device
  2. `sudo pip install -r requirements.txt --upgrade`
+    2.1. If your Platform is Windows, Install [Gow] on PC.
+    winget install Gow --source winget
  3. Run usbmuxd/iproxy SSH forwarding over USB (Default 2222 -> 22). e.g. `iproxy 2222 22`
  4. Run ./dump.py `Display name` or `Bundle identifier`
 
 For SSH/SCP make sure you have your public key added to the target device's ~/.ssh/authorized_keys file.
 
 ```
-./dump.py Aftenposten
+./dump_e4.py Aftenposten
 Start the target app Aftenposten
 Dumping Aftenposten to /var/folders/wn/9v1hs8ds6nv_xj7g95zxyl140000gn/T
 start dump /var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/AftenpostenApp
@@ -39,7 +42,7 @@ Done.
 Congratulations!!! You've got a decrypted IPA file.
 
 Drag to [MonkeyDev](https://github.com/AloneMonkey/MonkeyDev), Happy hacking!
-
+Edit By [Kai_HT] (https://github.com/KaiHT-Ladiant), (https://redsec.kaiht.kr/)
 ## Support
 
 Python 2.x and 3.x
