@@ -8,7 +8,7 @@ Pull a decrypted IPA from a jailbroken device for Windows Users.
  1. Install [frida](http://www.frida.re/) on device
  2. `sudo pip install -r requirements.txt --upgrade
  3. If your Platform is Windows, Install [Gow] on PC.
-    winget install Gow --source winget
+    - **winget install Gow --source winget**
  4. Run usbmuxd/iproxy SSH forwarding over USB (Default 2222 -> 22). e.g. `iproxy 2222 22`
  5. Run ./dump.py `Display name` or `Bundle identifier`
 
