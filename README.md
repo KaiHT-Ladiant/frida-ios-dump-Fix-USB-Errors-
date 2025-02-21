@@ -1,7 +1,7 @@
 # frida-ios-dump (Fix Frida USB Error)
 Pull a decrypted IPA from a jailbroken device for Windows Users.
 - This is a code that modified the existing 'dump-frida-ios' code. It was modified to run on Windows and Linux platforms, and fixed a USB error in frida 16.1.x and later versions.
-
+- Add DEVICE_ID Options in code.
 
 ## Usage
 
@@ -15,8 +15,8 @@ Pull a decrypted IPA from a jailbroken device for Windows Users.
 For SSH/SCP make sure you have your public key added to the target device's ~/.ssh/authorized_keys file.
 
 ```
-./dump_e4.py Aftenposten
-Start the target app Aftenposten
+python ./dump_e4.py -d [Device_Name] -o Edit-Aftenposten.ipa [YOUR_PACAKGE_NAME] 
+Start the target app [YOUR_PACAKGE_NAME]
 Dumping Aftenposten to /var/folders/wn/9v1hs8ds6nv_xj7g95zxyl140000gn/T
 start dump /var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/AftenpostenApp
 start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/AFNetworking.framework/AFNetworking
@@ -34,7 +34,7 @@ start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B5
 start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftObjectiveC.dylib
 start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftQuartzCore.dylib
 start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftUIKit.dylib
-Generating Aftenposten.ipa
+Generating Edit-Aftenposten.ipa
 
 Done.
 ```
