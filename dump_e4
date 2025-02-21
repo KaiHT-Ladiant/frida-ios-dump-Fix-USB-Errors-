@@ -35,7 +35,7 @@ import time
 
 
 def remove_readonly(func, path, _):
-    """Windows 읽기 전용 속성 제거 핸들러"""
+    
     os.chmod(path, stat.S_IWRITE)
     func(path)
 
@@ -110,14 +110,14 @@ def generate_ipa(path, display_name):
         ipa_path = os.path.join(os.getcwd(), ipa_filename)
         zip_args = ('zip', '-qr', ipa_path, target_dir)
         subprocess.check_call(zip_args, cwd=TEMP_DIR)
-        print('\n[SUCCESS] IPA 저장 경로:', os.path.abspath(ipa_path))
+        print('\n[SUCCESS] IPA Save Path:', os.path.abspath(ipa_path))
                 
     except Exception as e:
-        print(f"IPA 생성 실패: {e}")
+        print(f"Create IPA Failed: {e}")
     finally:
         if os.path.exists(PAYLOAD_PATH):
             try:
-                # Windows 전용 강제 삭제
+                # Force Only Windows Delete.
                 if platform.system() == 'Windows':
                     subprocess.check_call(
                         ['takeown', '/F', PAYLOAD_PATH, '/R', '/D', 'Y'],
@@ -129,7 +129,7 @@ def generate_ipa(path, display_name):
                     )
                 shutil.rmtree(PAYLOAD_PATH, onerror=remove_readonly)
             except Exception as e:
-                print(f"청소 실패: {e}")
+                print(f"Cleanup Failed: {e}")
         finished.set()
 
 
@@ -160,12 +160,12 @@ def on_message(message, data):
 
             chmod_dir = os.path.join(PAYLOAD_PATH, os.path.basename(dump_path))
             
-            # Windows에서만 실행 방지
+            # Only Running Windows Platform Dismiss.
             if platform.system() != 'Windows':
                 try:
                     os.chmod(chmod_dir, stat.S_IREAD | stat.S_IWRITE)
                 except Exception as e:
-                    print(f"권한 설정 실패: {e}")
+                    print(f"Set permission settings Failed: {e}")
 
             index = origin_path.find('.app/')
             file_dict[os.path.basename(dump_path)] = origin_path[index + 5:]
@@ -183,7 +183,7 @@ def on_message(message, data):
                 try:
                     os.chmod(chmod_dir, 0o755)
                 except Exception as e:
-                    print(f"권한 설정 실패: {e}")
+                    print(f"Set Permissions settings Failed: {e}")
 
             file_dict['app'] = os.path.basename(app_path)
 
@@ -296,7 +296,7 @@ def fix_windows_permissions(path):
                 try:
                     subprocess.check_call(['attrib', '-R', full_path, '/S', '/D'])
                 except subprocess.CalledProcessError as e:
-                    print(f"속성 변경 실패: {e}")
+                    print(f"Failed to change properties: {e}")
 
 
 
@@ -319,16 +319,16 @@ def open_target_app(device, name_or_bundleid):
 
     try:
         if not pid:
-            print(f"앱 실행 시도: {bundle_identifier}")
+            print(f"Try to run Application: {bundle_identifier}")
             pid = device.spawn([bundle_identifier])
             session = device.attach(pid)
             device.resume(pid)
-            time.sleep(2)  # 앱 실행 대기 추가
+            time.sleep(2)  # Run Application add Queue
         else:
             session = device.attach(pid)
         return session, display_name, bundle_identifier
     except Exception as e:
-        print(f"앱 실행 실패: {e}")
+        print(f"Application Running Failed: {e}")
         raise
 
     pid = ''
@@ -443,7 +443,7 @@ if __name__ == '__main__':
         finally:
             if os.path.exists(PAYLOAD_PATH):
                 fix_windows_permissions(PAYLOAD_PATH)
-                for _ in range(3):  # 최대 3회 재시도
+                for _ in range(3):  # Retry up to 3 times
                     try:
                         shutil.rmtree(PAYLOAD_PATH, onerror=remove_readonly)
                         break
