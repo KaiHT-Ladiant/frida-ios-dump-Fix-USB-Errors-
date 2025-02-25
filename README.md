@@ -15,7 +15,7 @@ Pull a decrypted IPA from a jailbroken device for Windows Users.
 For SSH/SCP make sure you have your public key added to the target device's ~/.ssh/authorized_keys file.
 
 ```
-python ./dump_e4.py -d [Device_Name] -o Edit-Aftenposten.ipa [YOUR_PACAKGE_NAME] 
+python ./dump_e4.py -d [Device_Name] -o [DumpiOSFileName].ipa [YOUR_PACAKGE_NAME]
 Start the target app [YOUR_PACAKGE_NAME]
 Dumping Aftenposten to /var/folders/wn/9v1hs8ds6nv_xj7g95zxyl140000gn/T
 start dump /var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/AftenpostenApp
