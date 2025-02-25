@@ -34,7 +34,7 @@ start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B5
 start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftObjectiveC.dylib
 start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftQuartzCore.dylib
 start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftUIKit.dylib
-Generating Edit-Aftenposten.ipa
+Generating [DumpiOSFileName].ipa
 
 Done.
 ```
